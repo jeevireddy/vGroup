@@ -357,7 +357,7 @@
                     socket.onopen = function () {
                         // Socket has opened. Now wait for the server to
                         // send us the initial packet.
-                        Console.log("WebSocket connection opened.");
+                        Console.log("Welcome to vGroup Chat, Chat Room : NFL.");
 
                         // Set up a timer for pong messages.
                         pingTimerId = window.setInterval(function() {
@@ -367,7 +367,7 @@
 
                     socket.onclose = function () {
                         eventForwarder.callFunction(function() {
-                            Console.log("WebSocket connection closed.");
+                            Console.log("Chat Room : NFL closed.");
                             disableControls();
 
                             // Disable pong timer.

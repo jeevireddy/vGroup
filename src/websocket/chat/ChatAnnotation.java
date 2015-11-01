@@ -53,44 +53,13 @@ public class ChatAnnotation {
 
     public ChatAnnotation() 
     {
-    	int chatId = 222114;
     	int increment =0;
     	String user_id = "";
     	increment = connectionIds.getAndIncrement();
-    	String sql = "select user_id from vgroup.tbl_userinventory where account_id = ?";
-    	chatId = chatId + increment;
+    	user_id = getuserId(increment);
     	
-    	try
-    	{
-    		Connection connection = DBConnection.getDBConnection();
-    		ResultSet rs= null;
-    		PreparedStatement pstmt = null;
-    		pstmt = connection.prepareStatement(sql);
-    		pstmt.setInt(1,  chatId);
-    		rs = pstmt.executeQuery();
-    		
-    		while(rs!=null && rs.next())
-    		{	
-    			System.out.println(rs.toString());
-    			user_id = rs.getString("user_id");
-    			
-    		}
-    		if (rs!=null)
-    			rs.close();
-    		if (pstmt!=null)
-    			pstmt.close();
-    		
-    		if(user_id=="")
-    			user_id = GUEST_PREFIX + increment;
-        	
-    		   		
-    		if(connection!=null && !connection.isClosed())
-    			connection.close();
-    		
-    	}catch (Exception e)
-    	{
-    		System.out.println(e.toString());
-    	}
+    	if(user_id=="")
+			user_id = GUEST_PREFIX + increment;
     	
     	nickname = user_id;
     }
@@ -100,6 +69,7 @@ public class ChatAnnotation {
     public void start(Session session) {
         this.session = session;
         connections.add(this);
+        insertChatText(nickname,"Joined chat room");
         String message = String.format("* %s %s", nickname, "has joined.");
         broadcast(message);
     }
@@ -108,6 +78,7 @@ public class ChatAnnotation {
     @OnClose
     public void end() {
         connections.remove(this);
+        insertChatText(nickname,"Disconnected Chat room");
         String message = String.format("* %s %s",
                 nickname, "has disconnected.");
         broadcast(message);
@@ -119,7 +90,11 @@ public class ChatAnnotation {
         // Never trust the client
         String filteredMessage = String.format("%s: %s",
                 nickname, HTMLFilter.filter(message.toString()));
+        insertChatText(nickname,filteredMessage);
+        filteredMessage = filteredMessage + " Your Dyamic Ad. here";
         broadcast(filteredMessage);
+        
+        
     }
 
 
@@ -145,10 +120,132 @@ public class ChatAnnotation {
                 } catch (IOException e1) {
                     // Ignore
                 }
+                
                 String message = String.format("* %s %s",
                         client.nickname, "has been disconnected.");
+                insertChatText(client.nickname,"has been disconnected");
                 broadcast(message);
             }
         }
     }
+    
+    private static String getuserId(int increment) 
+    {
+    	int chatId = 222114;
+    	String sql = "select user_id from vgroup.tbl_userinventory where account_id = ?";
+    	chatId = chatId + increment;
+    	String user_id = "";
+    	try
+    	{
+    		Connection connection = DBConnection.getDBConnection();
+    		ResultSet rs= null;
+    		PreparedStatement pstmt = null;
+    		pstmt = connection.prepareStatement(sql);
+    		pstmt.setInt(1,  chatId);
+    		rs = pstmt.executeQuery();
+    		
+    		while(rs!=null && rs.next())
+    		{	
+    			System.out.println(rs.toString());
+    			user_id = rs.getString("user_id");
+    			
+    		}
+    		if (rs!=null)
+    			rs.close();
+    		if (pstmt!=null)
+    			pstmt.close();
+    		
+    		if(connection!=null && !connection.isClosed())
+    			connection.close();
+    		
+    	}catch (Exception e)
+    	{
+    		System.out.println(e.toString());
+    	}
+
+    	return user_id;
+    }
+    
+    
+    private static String getAccountId(String user_id) 
+    {
+    	String account_id="";
+    	String sql = "select account_id from vgroup.tbl_userinventory where user_id = ?";
+    	try
+    	{
+    		Connection connection = DBConnection.getDBConnection();
+    		ResultSet rs= null;
+    		PreparedStatement pstmt = null;
+    		pstmt = connection.prepareStatement(sql);
+    		pstmt.setString(1,  user_id);
+    		rs = pstmt.executeQuery();
+    		
+    		while(rs!=null && rs.next())
+    		{	
+    			System.out.println(rs.toString());
+    			account_id = rs.getString("account_id");
+    			
+    		}
+    		if (rs!=null)
+    			rs.close();
+    		if (pstmt!=null)
+    			pstmt.close();
+    		
+    		if(connection!=null && !connection.isClosed())
+    			connection.close();
+    		
+    	}catch (Exception e)
+    	{
+    		System.out.println(e.toString());
+    	}
+
+    	return account_id;
+    }
+    
+    private static void insertChatText(String nickname, String chat_text) 
+    {
+    	
+    	String account_id ="";
+    	String user_id ="";
+    	String chat_group ="NFL";
+    	String latitude ="40.91709";
+    	String longitude ="-72.709457";
+    	String timestamp ="";
+    	if(chat_text.contains(nickname))
+		{
+    		chat_text = chat_text.substring(nickname.length()+1, chat_text.length());
+		}
+    	account_id  = getAccountId(nickname);
+    	user_id = nickname;
+    	java.util.Date datetime = new java.util.Date();
+    	try 
+        {
+
+    		String sql = "insert into  vgroup.tbl_chathistory (Account_id, User_id, Chat_Group,  Chat, Latitude, Longitude ) values (?,?,?,?,?,?)";
+        	Connection connection = DBConnection.getDBConnection();
+    		ResultSet rs= null;
+    		PreparedStatement pstmt = null;
+    		pstmt = connection.prepareStatement(sql);
+    		pstmt.setString(1, account_id);
+        	pstmt.setString(2, user_id);
+        	pstmt.setString(3, chat_group);
+        	pstmt.setString(4, chat_text);
+        	pstmt.setString(5, latitude);
+        	pstmt.setString(6, longitude);
+        	int updateQuery = pstmt.executeUpdate();
+
+    		if (rs!=null)
+    			rs.close();
+    		if (pstmt!=null)
+    			pstmt.close();
+    		
+    		if(connection!=null && !connection.isClosed())
+    			connection.close();
+
+        } catch (Exception e) 
+    	{
+        	System.out.println(e.toString());        
+        }
+    }
+    
 }

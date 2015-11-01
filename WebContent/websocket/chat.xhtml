@@ -49,7 +49,7 @@
         var Chat = {};
 
         Chat.socket = null;
-		
+		 
         Chat.connect = (function(host) {
             if ('WebSocket' in window) {
                 Chat.socket = new WebSocket(host);
@@ -61,7 +61,7 @@
             }
 
             Chat.socket.onopen = function () {
-                Console.log('Info: WebSocket connection opened.');
+                Console.log('Welcome to vGroup Chat, Chat Room : NFL');
                 document.getElementById('chat').onkeydown = function(event) {
                     if (event.keyCode == 13) {
                         Chat.sendMessage();
@@ -71,7 +71,7 @@
 
             Chat.socket.onclose = function () {
                 document.getElementById('chat').onkeydown = null;
-                Console.log('Info: WebSocket closed.');
+                Console.log('Chat Room closed.');
             };
 
             Chat.socket.onmessage = function (message) {
