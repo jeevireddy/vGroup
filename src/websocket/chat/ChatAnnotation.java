@@ -91,7 +91,14 @@ public class ChatAnnotation {
         String filteredMessage = String.format("%s: %s",
                 nickname, HTMLFilter.filter(message.toString()));
         insertChatText(nickname,filteredMessage);
-        filteredMessage = filteredMessage + " Your Dyamic Ad. here";
+        
+        System.currentTimeMillis();
+        
+        String adText ="";
+        callTopKeyWordProc();
+        adText = " Your advertisement here :"+getTopKeyWord() + ":";
+    
+        filteredMessage = filteredMessage + adText;
         broadcast(filteredMessage);
         
         
@@ -164,6 +171,74 @@ public class ChatAnnotation {
     	}
 
     	return user_id;
+    }
+    
+    
+    private static void callTopKeyWordProc() 
+    {
+    	
+    	
+    	String simpleProc = "{ call vgroup.split_string() }";
+ 
+        
+    	String sql = "call vgroup.split_string();";
+    	try
+    	{
+    		Connection connection = DBConnection.getDBConnection();
+    		PreparedStatement pstmt = null;
+    		pstmt = connection.prepareStatement(sql);
+            CallableStatement cs = connection.prepareCall(simpleProc);
+            cs.execute();
+            
+    		if (cs!=null)
+    			cs.close();
+    		if (pstmt!=null)
+    			pstmt.close();
+    		
+    		if(connection!=null && !connection.isClosed())
+    			connection.close();
+    		
+    	}catch (Exception e)
+    	{
+    		System.out.println(e.toString());
+    	}
+
+    }
+    
+    
+    private static String getTopKeyWord() 
+    {
+    	String sql = "select  splitted_column,insert_ts from vgroup.tbl_finallist where 1 =1 and id ='NFL' order by cnt desc limit 1";
+    	String topKeyWord = "";
+    	try
+    	{
+    		Connection connection = DBConnection.getDBConnection();
+    		ResultSet rs= null;
+    		PreparedStatement pstmt = null;
+    		pstmt = connection.prepareStatement(sql);
+    		rs = pstmt.executeQuery();
+    		String insertTs = "";
+    		while(rs!=null && rs.next())
+    		{	
+    			System.out.println(rs.toString());
+    			topKeyWord = rs.getString("splitted_column");
+    			insertTs = rs.getString("insert_ts");
+    			
+    		}
+    		if (rs!=null)
+    			rs.close();
+    		if (pstmt!=null)
+    			pstmt.close();
+    		
+    		if(connection!=null && !connection.isClosed())
+    			connection.close();
+    		
+    	}catch (Exception e)
+    	{
+    		System.out.println(e.toString());
+    	}
+    	    	
+    	return topKeyWord;
     }
     
     
