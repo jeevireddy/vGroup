@@ -96,13 +96,13 @@ public class ChatAnnotation {
         
         String adText ="";
         callTopKeyWordProc();
-        adText = " Your advertisement here :"+getTopKeyWord() + ":";
+        adText = "Your advertisement here :<<"+getTopKeyWord() + ">>";
     
-        filteredMessage = filteredMessage + adText;
+        filteredMessage = filteredMessage;
         broadcast(filteredMessage);
         
-        
-    }
+        broadcast(adText);
+     }
 
 
 
