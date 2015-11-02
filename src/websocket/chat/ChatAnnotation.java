@@ -44,6 +44,7 @@ public class ChatAnnotation {
     private static final Log log = LogFactory.getLog(ChatAnnotation.class);
 
     private static final String GUEST_PREFIX = "Guest";
+    private static final AtomicInteger chatMessageCount = new AtomicInteger(0);
     private static final AtomicInteger connectionIds = new AtomicInteger(0);
     private static final Set<ChatAnnotation> connections =
             new CopyOnWriteArraySet<>();
@@ -91,16 +92,21 @@ public class ChatAnnotation {
         String filteredMessage = String.format("%s: %s",
                 nickname, HTMLFilter.filter(message.toString()));
         insertChatText(nickname,filteredMessage);
-        
+        int chatmsgcnt =0;
+        chatmsgcnt = chatMessageCount.getAndIncrement();
+        if (chatmsgcnt ==0)
+        	chatmsgcnt = 1;
         System.currentTimeMillis();
         
         String adText ="";
-        callTopKeyWordProc();
-        adText = "Your advertisement here :<<"+getTopKeyWord() + ">>";
-    
-        filteredMessage = filteredMessage;
-        broadcast(filteredMessage);
+        if(chatmsgcnt%5==0)
+        {	
+        	callTopKeyWordProc();
+        	adText = " Your advertisement here :"+getTopKeyWord() + "";
+        }
         
+        filteredMessage = filteredMessage ;
+        broadcast(filteredMessage);
         broadcast(adText);
      }
 
