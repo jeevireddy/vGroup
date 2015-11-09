@@ -6,12 +6,10 @@ CREATE TABLE `my_splits` (
 
 CREATE TABLE `tbl_chathistory` (
   `Account_id` int(11) DEFAULT NULL,
-  `User_id` text,
-  `Chat_Group` text,
   `Chat` text,
   `Latitude` double DEFAULT NULL,
   `Longitude` double DEFAULT NULL,
-  `chat_ts` datetime DEFAULT CURRENT_TIMESTAMP
+  `TimeStamp` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `tbl_finallist` (
@@ -26,28 +24,10 @@ CREATE TABLE `tbl_stopwordlist` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE `tbl_userinventory` (
-  `User_id` text,
-  `Account_id` int(11) DEFAULT NULL,
-  `Name` text,
-  `Age` int(11) DEFAULT NULL,
-  `State` text,
-  `Gender` text,
-  `Sports` int(11) DEFAULT NULL,
-  `Business` int(11) DEFAULT NULL,
-  `Books` int(11) DEFAULT NULL,
-  `Politics` int(11) DEFAULT NULL,
-  `Art` int(11) DEFAULT NULL,
-  `Photography` int(11) DEFAULT NULL,
-  `Design` int(11) DEFAULT NULL,
-  `Technology` int(11) DEFAULT NULL,
-  `Music` int(11) DEFAULT NULL,
-  `Travel` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DELIMITER $$
-CREATE  PROCEDURE `split_string`()
+CREATE PROCEDURE `split_string`()
 BEGIN
 
 DECLARE my_delimiter CHAR(1);
@@ -82,8 +62,7 @@ SET my_delimiter=' ';
     while i <= occurance do
 #        select concat("SUBSTRING_INDEX(SUBSTRING_INDEX( '",split_string ,"', '",my_delimiter,"', ",i, "),'",my_delimiter,"',-1);");
 insert into my_splits (`splitted_column`,`id`)
-SELECT REPLACE(SUBSTRING(SUBSTRING_INDEX(split_string, ' ', i),LENGTH(SUBSTRING_INDEX(split_string, ' ', i -1)) + 1),' ', '')
-as splitted_column,split_id;
+SELECT SPLIT_STR1(split_string, ' ', i) as splitted_column,split_id;
         SET ins_query=concat("insert into my_splits(splitted_column,id) values(", concat("SUBSTRING_INDEX(SUBSTRING_INDEX( '",split_string ,"', '",my_delimiter,"', ",i, "),'",my_delimiter,"',-1),",split_id,");"));
         
     #select ins_query;
@@ -132,3 +111,15 @@ limit 1;
 END$$
 DELIMITER ;
 
+
+
+DELIMITER $$
+CREATE  FUNCTION `SPLIT_STR1`(
+  x VARCHAR(255),
+  delim VARCHAR(12),
+  pos INT
+) RETURNS varchar(255) CHARSET utf8
+RETURN REPLACE(SUBSTRING(SUBSTRING_INDEX(x, delim, pos),
+       LENGTH(SUBSTRING_INDEX(x, delim, pos -1)) + 1),
+       delim, '')$$
+DELIMITER ;
